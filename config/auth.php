@@ -40,6 +40,10 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        'pemains' => [
+            'driver' => 'session',
+            'provider' => 'pemains',
+        ],
     ],
 
     /*
@@ -63,6 +67,10 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', App\Models\User::class),
+        ],
+        'pemains' => [
+            'driver' => 'eloquent',
+            'model' => env('AUTH_MODEL', App\Models\pemain::class),
         ],
 
         // 'users' => [
