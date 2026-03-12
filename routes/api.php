@@ -9,7 +9,7 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-Route::apiResource('/game', GameController::class);
+Route::apiResource('/game', GameController::class)->middleware('auth:sanctum'); //untuk membuat agar hanya bisa diakses pleh orang yang hanya memiliki token/sudah login
 Route::apiResource('/login', loginKing::class);
 Route::apiResource('/register', loginKing::class);
 // Route::apiResource('/login', function (Request $request) {

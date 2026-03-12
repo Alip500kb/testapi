@@ -7,6 +7,7 @@ use App\Http\Resources\GameResource;
 use App\Models\game;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class GameController extends Controller
 {
@@ -25,6 +26,7 @@ class GameController extends Controller
 
     public function store(Request $request)
     {
+
         $valid = Validator::make($request->all(), [
             'title' => 'required|unique:games,title',
             'description' => 'required'
@@ -38,17 +40,19 @@ class GameController extends Controller
             $id = rand(1,5555);
         } while (game::where('id',$id)->exists());
 
+        $uploader = $request->user(); //ingat ini untuk mendefinisikan pengguna layaknya Auth user()
+        // $request->bearerTOken() untuk mendapat personal acces token
         game::create([
             'id' => $id,
             'title' => $request['title'],
-            'slug' => $request['title'] . "LKS" . strval($id),
+            'slug' => Str::slug($request['title'] . " LKS " . $id, "_"),
             'description' => $request['description'],
-            'created_by' => $request['created_by']
+            'created_by' => $uploader['id']
         ]);
 
-        $succes = [
+        $succes = [ //Str::slug untuk membuat slug
             'status' => 'Berhasil',
-            'slug' => $request['title'] . "LKS" . strval($id)
+            'slug' => Str::slug($request['title'] . " LKS " . strval($id), "_")
         ];
         return response($succes,201);
     }

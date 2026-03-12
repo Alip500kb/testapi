@@ -24,7 +24,7 @@ class loginKing extends Controller
             // $token = $user->createToken('api-token')->plainTextToken;
             return response()->json([
                 'status' => 'berhasil',
-                'token' => $user->createToken(),
+                'token' => $user->createToken('user-login')->plainTextToken,
             ], 200);
         }
         return response()->json([
@@ -32,7 +32,6 @@ class loginKing extends Controller
                 'message' => 'Nama Pengguna atau sandi salah',
             ], 401);
     }
-
 
 
     public function login(Request $request)
@@ -55,9 +54,9 @@ class loginKing extends Controller
 
     public function register(Request $request)
     {
+
         $valid = $request->validate([
-            'username' => 'required|string|min:4|unique:pemains,username',
-            'password' => 'required|min:5'
+            ''
         ]);
 
         do {
@@ -72,34 +71,39 @@ class loginKing extends Controller
         ]);
 
         Auth::guard('pemains')->attempt($valid);
+        $pengguna = pemain::where('username', $request['username'])->first();
         $sukses = [
             'status' => 'berhasil',
-            'token' => $request->bearerToken()
+            'token' =>  $pengguna->createToken('user-login')->plainTextToken
             ];
         return response()->json($sukses, 201);
     }
+
+
     public function store(Request $request)
     {
-        $valid = $request->validate([
+        $valid = validator($request->all(), [
             'username' => 'required|string|min:4|unique:pemains,username',
             'password' => 'required|min:5'
         ]);
 
+        if ($valid->fails()) {
+            return response()->json($valid->errors(), 401);
+        }
         do {
             $id  = rand(1,63636);
         } while (pemain::where('id', $id)->exists());
 
         pemain::create([
             'id' => $id,
-            'username' => $valid['username'],
-            'password' => Hash::make($valid['password']),
+            'username' => $request['username'],
+            'password' => Hash::make($request['password']),
             'last_login_at' => Carbon::now()
         ]);
-
-        Auth::guard('pemains')->attempt($valid);
+        $pengguna = pemain::where('username', $request['username'])->first();
         $sukses = [
             'status' => 'berhasil',
-            'token' => $request->bearerToken()
+            'token' => $pengguna->createToken('user-login')->plainTextToken //membuat token untuk login sanctum
             ];
         return response()->json($sukses, 201);
     }
