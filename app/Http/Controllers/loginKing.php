@@ -13,13 +13,12 @@ use Illuminate\Validation\ValidationException;
 
 class loginKing extends Controller
 {
-    public function index(Request $request) {
+    public function index(Request $request) { //get
         $valid = $request->validate([
             'username' => 'required',
             'password' => 'required',
         ]);
         if (Auth::guard('pemains')->attempt($valid)) {
-            Auth::guard('pemains')->attempt($valid);
             $user = pemain::where('username', $valid['username'])->first(); //memuat data sesi login
             // $token = $user->createToken('api-token')->plainTextToken;
             return response()->json([
@@ -52,36 +51,13 @@ class loginKing extends Controller
         return 'gagal';
     }
 
-    public function register(Request $request)
+
+    public function store(Request $request) //POST
     {
+        if ((pemain::where('username', $request['username'])->exists())) {
+            return response()->json(['status' => 'tidak valid', 'message' => 'Nama Pengguna Sudah Ada'],400);
+        }
 
-        $valid = $request->validate([
-            ''
-        ]);
-
-        do {
-            $id  = rand(1,63636);
-        } while (pemain::where('id', $id)->exists());
-
-        pemain::create([
-            'id' => $id,
-            'username' => $valid['username'],
-            'password' => Hash::make($valid['password']),
-            'last_login_at' => Carbon::now()
-        ]);
-
-        Auth::guard('pemains')->attempt($valid);
-        $pengguna = pemain::where('username', $request['username'])->first();
-        $sukses = [
-            'status' => 'berhasil',
-            'token' =>  $pengguna->createToken('user-login')->plainTextToken
-            ];
-        return response()->json($sukses, 201);
-    }
-
-
-    public function store(Request $request)
-    {
         $valid = validator($request->all(), [
             'username' => 'required|string|min:4|unique:pemains,username',
             'password' => 'required|min:5'
@@ -106,5 +82,18 @@ class loginKing extends Controller
             'token' => $pengguna->createToken('user-login')->plainTextToken //membuat token untuk login sanctum
             ];
         return response()->json($sukses, 201);
+    }
+
+    public function logout(Request $request) {
+        // dd($request);
+        if (!(pemain::where('id', $request->user())->exists())) {
+            return response()->json(['status' => 'tidak ditemukan', 'message' => 'Pengguna Tidak Ditemukan'],403);
+        }
+
+        $request->user()->currentAccessToken()->delete();
+        $berhasil = [
+            'status' => 'berhasil'
+        ];
+        return response()->json($berhasil, 204);
     }
 }
