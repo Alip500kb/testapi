@@ -75,4 +75,30 @@ class GameController extends Controller
 
         return response()->json($detail, 200);
     }
+    public function update(Request $request,$slug) {
+        $game = game::where('slug', $slug)->first();
+        if (!$game) {
+            return response()->json(['status' => 'gagal game tidak ditemukan'], 403);
+        }
+
+        $game->update([
+            'title' => $request['title'],
+            'description' => $request['description']
+        ]);
+
+        return response()->json([
+            'status' => 'keberhasilan'
+        ]);
+    }
+
+    public function destroy($slug){
+        $game = game::where('slug', $slug)->first();
+        if (!$game) {
+            return response()->json(['status' => 'gagal game tidak ditemukan'], 403);
+        }
+
+        $game->delete();
+
+        return response()->json(['null'], 204);
+    }
 }
