@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('administrators', function (Blueprint $table) {
+        Schema::create('scores', function (Blueprint $table) {
             $table->unsignedBigInteger('id');
-            $table->string('username');
-            $table->string('password');
-            $table->timestamp('last_login_at');
+            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('game_version_id');
+            $table->double('score');
             $table->timestamps();
         });
     }
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('administrators');
+        Schema::dropIfExists('scores');
     }
 };

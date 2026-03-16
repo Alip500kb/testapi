@@ -12,6 +12,6 @@ Route::get('/user', function (Request $request) {
 
 Route::apiResource('/game', GameController::class)->middleware('auth:sanctum'); //untuk membuat agar hanya bisa diakses pleh orang yang hanya memiliki token/sudah login
 Route::apiResource('/login', loginKing::class);
-Route::get('/logout', [loginKing::class, 'logout']);
+Route::get('/logout', [loginKing::class, 'logout'])->middleware('auth:sanctum'); //perlu middleware untuk mendefinisikan user()
 Route::apiResource('/register', loginKing::class);
 Route::apiResource('/pengguna', pemainController::class);

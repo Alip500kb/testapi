@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use Nette\Utils\Json;
 
 class loginKing extends Controller
 {
@@ -79,21 +80,51 @@ class loginKing extends Controller
         $pengguna = pemain::where('username', $request['username'])->first();
         $sukses = [
             'status' => 'berhasil',
-            'token' => $pengguna->createToken('user-login')->plainTextToken //membuat token untuk login sanctum
+            'username' => $pengguna['username'] //membuat token untuk login sanctum
             ];
         return response()->json($sukses, 201);
     }
 
     public function logout(Request $request) {
-        // dd($request);
-        if (!(pemain::where('id', $request->user())->exists())) {
-            return response()->json(['status' => 'tidak ditemukan', 'message' => 'Pengguna Tidak Ditemukan'],403);
-        }
-
+        //$request->user() hanya dapat digunakan jika sudah menggunakan middleware sanctum
         $request->user()->currentAccessToken()->delete();
         $berhasil = [
             'status' => 'berhasil'
         ];
         return response()->json($berhasil, 204);
+    }
+
+    public function update(Request $request,$id) {
+        //perlu id karena PUT tidak dapat diakses tanpa /{id}
+        $valid = Validator::make($request->all(),
+        [
+            'username' => 'required|min:4|max:60',
+            'password' => 'required|min:5|max:10'
+        ]);
+
+        if ($valid->fails()) {
+            return response()->json($valid->errors(),400);
+        }
+
+        $pemain = pemain::find($id);
+
+        $pemain->update([
+            'username' => $request['username'],
+            'password' => Hash::make($request['password'])
+        ]);
+
+        return response()->json(['status' => 'berhasil', 'username' => $request['username']], 201);
+    }
+
+    public function destroy($id) {
+        if (!pemain::where('id', $id)->exists()) {
+            return response()->json(['status' => 'tidak ditemukan', 'message' => 'Pengguna tidak ditemukan'],  403);
+        }
+
+        $pemain = pemain::find($id);
+
+        $pemain->delete();
+
+        return response()->json(['null'], 204);
     }
 }

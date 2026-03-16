@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\GameResource;
 use App\Models\game;
+use App\Models\pemain;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -28,8 +29,8 @@ class GameController extends Controller
     {
 
         $valid = Validator::make($request->all(), [
-            'title' => 'required|unique:games,title',
-            'description' => 'required'
+            'title' => 'required|unique:games,title|min:4',
+            'description' => 'required|min:1'
         ]);
 
         if ($valid->fails()) {
@@ -55,5 +56,23 @@ class GameController extends Controller
             'slug' => Str::slug($request['title'] . " LKS " . strval($id), "_")
         ];
         return response($succes,201);
+    }
+    public function show($slug) {
+        $game = game::where('slug', $slug)->first();
+        if (!$game) {
+            return response()->json(['status' => 'Game tidak ditemukan'], 403);
+        }
+        $writter = pemain::find($game['created_by']);
+        $detail = [
+            'slug' => $game['slug'],
+            'title' => $game['title'],
+            'description' => $game['description'],
+            'uploaded_at' => $game['created_at'],
+            'writted' => $writter['username'],
+            'skorCount' => null,
+            'gamePath' => null
+        ];
+
+        return response()->json($detail, 200);
     }
 }

@@ -6,13 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-class administrator extends Model
+class score extends Model
 {
-    use Notifiable, HasApiTokens;
+    use Notifiable,HasApiTokens;
+
     protected $fillable = [
         'id',
-        'username',
-        'password',
-        'last_login_at'
+        'user_id',
+        'game_version_id',
+        'score'
     ];
 }
