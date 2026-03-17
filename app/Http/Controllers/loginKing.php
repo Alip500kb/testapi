@@ -6,6 +6,7 @@ use App\Models\pemain;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
@@ -21,6 +22,7 @@ class loginKing extends Controller
         ]);
         if (Auth::guard('pemains')->attempt($valid)) {
             $user = pemain::where('username', $valid['username'])->first(); //memuat data sesi login
+            $user->tokens()->delete();
             // $token = $user->createToken('api-token')->plainTextToken;
             return response()->json([
                 'status' => 'berhasil',
@@ -75,7 +77,8 @@ class loginKing extends Controller
             'id' => $id,
             'username' => $request['username'],
             'password' => Hash::make($request['password']),
-            'last_login_at' => Carbon::now()
+            'role_id' => '3', //jangan lupa ditambahkan pada fillable
+            'last_login_at' => Carbon::now() //jangan lupa juga untuk cek di role kalau id nya sudah ada
         ]);
         $pengguna = pemain::where('username', $request['username'])->first();
         $sukses = [
@@ -95,6 +98,11 @@ class loginKing extends Controller
     }
 
     public function update(Request $request,$id) {
+
+        if (!Gate::allows('administrator')) {
+            return response()->json(['status' => 'dilarang', 'message' => 'Anda bukan administrator'], 403);
+        }
+
         //perlu id karena PUT tidak dapat diakses tanpa /{id}
         $valid = Validator::make($request->all(),
         [

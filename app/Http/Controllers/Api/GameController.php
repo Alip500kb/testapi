@@ -7,6 +7,7 @@ use App\Http\Resources\GameResource;
 use App\Models\game;
 use App\Models\pemain;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
@@ -14,6 +15,13 @@ class GameController extends Controller
 {
     public function index()
     {
+        //error handler jika tidak sesuai dengan role
+        if (! Gate::allows('developer_game')) {
+            return response()->json(['status' => 'dilarang',
+            'message' => 'Anda tidak memiliki otorisasi untuk melakukan ini'
+            ], 403);
+        }
+
         $gamelist = game::all()->map(fn($gamelist) => [
             'slug' => $gamelist->slug,
             'title' => $gamelist->title,
@@ -57,6 +65,8 @@ class GameController extends Controller
         ];
         return response($succes,201);
     }
+
+
     public function show($slug) {
         $game = game::where('slug', $slug)->first();
         if (!$game) {
