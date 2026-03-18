@@ -36,6 +36,10 @@ class GameController extends Controller
     public function store(Request $request)
     {
 
+        if (!(Gate::allows('developer_game')) & !(Gate::allows('administrator'))) {
+            return  response()->json(['status' => 'dilarang', 'message' => 'Anda tidak memiliki izin'], 403);
+        }
+
         $valid = Validator::make($request->all(), [
             'title' => 'required|unique:games,title|min:4',
             'description' => 'required|min:1'
